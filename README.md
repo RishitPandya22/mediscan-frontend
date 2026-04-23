@@ -1,67 +1,84 @@
-# 🏥 MediScan AI — Multi-Disease Risk Predictor v2.0
+# 🏥 MediScan AI — Multi-Disease Risk Predictor v3.0
 
-![MediScan AI](https://img.shields.io/badge/MediScan-AI_v2.0-00ff95?style=for-the-badge&logo=react&logoColor=black)
+![MediScan AI](https://img.shields.io/badge/MediScan-AI_v3.0-00ff95?style=for-the-badge&logo=react&logoColor=black)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-Animations-FF0055?style=for-the-badge&logo=framer&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Auth_+_DB-3ECF8E?style=for-the-badge&logo=supabase&logoColor=black)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)
 
-> A full stack AI-powered early disease risk detection web application. Built with React, FastAPI, scikit-learn, and Supabase. Features real authentication, 3 trained ML models, feature importance analysis, what-if simulation, prediction history, and a Cyber-Brutalism dark UI with Framer Motion animations.
+> A production-grade full stack AI web application for early disease risk detection. Built with React, FastAPI, scikit-learn, and Supabase. Features real Google OAuth authentication, 3 trained ML models, confidence intervals, feature importance, what-if simulation, risk trend charts, prediction history, PDF export, user profiles with avatar upload, and a Cyber-Brutalism dark UI with Framer Motion animations.
 
 🌐 **Live App:** [mediscan-frontend-ruby.vercel.app](https://mediscan-frontend-ruby.vercel.app)
 🔧 **Backend API:** [mediscan-backend-lmhf.onrender.com](https://mediscan-backend-lmhf.onrender.com)
+📖 **API Docs:** [mediscan-backend-lmhf.onrender.com/docs](https://mediscan-backend-lmhf.onrender.com/docs)
 
 ---
 
 ## 🎯 What Does This App Do?
 
 MediScan AI allows anyone to:
-- Create a secure account and log in with protected routes
-- Input personal health vitals and biomarkers via interactive sliders
-- Get an instant AI-powered risk assessment for 3 diseases
-- See which health factors are driving the risk (feature importance)
-- Simulate "what-if" scenarios — what happens if you improve your health metrics
-- View their full prediction history saved to the cloud
-- Receive personalised health recommendations based on results
+- Sign up or log in with **Google OAuth** or email/password
+- Reset their password via email if forgotten
+- Input personal health vitals via interactive sliders
+- Get instant AI-powered risk predictions for 3 diseases
+- See a **95% confidence interval** showing model certainty
+- Understand **which health factors** drove the prediction (feature importance)
+- Simulate **"what-if" health improvements** and see risk change live
+- View their **risk trend chart** — a line graph of all past predictions over time
+- Download a professional **PDF medical report** of their results
+- Manage their **user profile** — edit name, username, upload avatar
 
 ---
 
 ## 🚀 Features
 
 ### 🔐 Authentication
-- Supabase-powered signup & login
+- Google OAuth — one click sign in with Google
+- Email + Password signup and login
+- Forgot password — real reset email via Supabase
 - Protected routes — dashboard inaccessible without login
-- Username + full name stored in Supabase profiles table
-- Session persistence across page refreshes
+- Username + full name + avatar stored in Supabase profiles table
 
 ### 🧠 AI Predictions
-- 🩸 **Diabetes Predictor** — Random Forest trained on Pima Indians Dataset
-- 🫀 **Heart Disease Predictor** — Gradient Boosting on Cleveland Dataset
-- 🫁 **Parkinson's Predictor** — Gradient Boosting on UCI Voice Dataset
+- 🩸 **Diabetes Predictor** — Random Forest trained on Pima Indians Dataset (~73% accuracy)
+- 🫀 **Heart Disease Predictor** — Gradient Boosting on Cleveland Dataset (~93% accuracy)
+- 🫁 **Parkinson's Predictor** — Gradient Boosting on UCI Voice Dataset (~95% accuracy)
 
 ### 📊 Advanced Analytics
-- **Feature Importance** — See exactly which inputs drove the prediction
-- **What-If Simulator** — Simulate health improvements and see risk change
-- **Animated Probability Bar** — Liquid fill animation showing exact risk %
-- **Animated Number Counter** — Risk probability counts up dramatically
+- **Confidence Intervals** — 95% CI showing lower and upper probability bounds
+- **Feature Importance** — Top 5 factors that drove the prediction with animated bars
+- **What-If Simulator** — Simulate health improvements and see projected risk change
+- **Animated Probability Bar** — Liquid fill animation showing exact risk percentage
+- **Animated Number Counter** — Risk probability counts up dramatically on reveal
 
-### 📋 Prediction History
-- Every prediction saved to Supabase database
-- View last 10 predictions in collapsible history panel
-- Disease type, risk level, probability, and date all stored
+### 📋 Prediction History & Trends
+- Every prediction saved to Supabase PostgreSQL database
+- Collapsible history panel showing last 10 predictions
+- **Risk Trend Chart** — interactive line graph (Recharts) showing risk over time
+- Filter chart by disease type — Diabetes, Heart, or Parkinson's
+
+### 📄 PDF Report Export
+- Download a full medical-style PDF report
+- Includes risk result, probability, confidence interval, feature importance, what-if scenarios, and health tips
+- Auto-named with disease type and date
+
+### 👤 User Profile
+- Edit full name and username
+- Upload profile avatar (photo)
+- View personal prediction stats (total, high risk, low risk)
+- Danger zone — sign out of all sessions
 
 ### 🎨 UI/UX
 - Cyber-Brutalism dark terminal aesthetic
 - Framer Motion page transitions and micro-animations
-- Custom animated cursor with follower
+- Custom animated cursor with follower ring
 - Magnetic buttons that follow cursor movement
 - Glitch effect on logo
 - Floating animated orbs
 - Animated mesh gradient background
 - CRT scanline overlay
 - Glassmorphic cards with heavy backdrop blur
-- Fully responsive layout
 
 ---
 
@@ -71,10 +88,13 @@ MediScan AI allows anyone to:
 |---|---|
 | Frontend | React 18 + Vite |
 | Animations | Framer Motion |
-| Authentication | Supabase Auth |
+| Charts | Recharts |
+| Authentication | Supabase Auth (Email + Google OAuth) |
 | Database | Supabase PostgreSQL |
+| Storage | Supabase Storage (avatar uploads) |
 | Backend | FastAPI (Python) |
-| ML Models | scikit-learn |
+| ML Models | scikit-learn (Random Forest + Gradient Boosting) |
+| PDF Generation | ReportLab |
 | Frontend Deploy | Vercel |
 | Backend Deploy | Render |
 
@@ -88,20 +108,28 @@ MediScan AI allows anyone to:
 | 🫀 Heart Disease | Gradient Boosting (100 trees) | Cleveland (1025 rows) | ~93% |
 | 🫁 Parkinson's | Gradient Boosting (100 trees) | UCI Voice (195 rows) | ~95% |
 
+All models return:
+- Risk prediction (HIGH/LOW)
+- Probability score (0-100%)
+- 95% Confidence interval (lower/upper bounds)
+- Top 5 feature importances
+
 ---
 
 ## 📁 Project Structure
 mediscan-frontend/
 ├── src/
 │   ├── pages/
-│   │   ├── Login.jsx           ← Animated login with magnetic button
-│   │   ├── Register.jsx        ← Registration with validation
-│   │   └── Dashboard.jsx       ← Main predictor + history + what-if
+│   │   ├── Login.jsx             ← Google OAuth + email login
+│   │   ├── Register.jsx          ← Account creation
+│   │   ├── ForgotPassword.jsx    ← Password reset flow
+│   │   ├── Dashboard.jsx         ← Main predictor + all analytics
+│   │   └── Profile.jsx           ← User profile + trend chart
 │   ├── components/
-│   │   └── ProtectedRoute.jsx  ← Auth guard component
-│   ├── supabase.js             ← Supabase client config
-│   ├── App.jsx                 ← Router setup
-│   └── index.css               ← Global styles + animations
+│   │   └── ProtectedRoute.jsx    ← Auth guard
+│   ├── supabase.js               ← Supabase client
+│   ├── App.jsx                   ← Router
+│   └── index.css                 ← Global styles + animations
 ├── public/
 ├── index.html
 └── package.json
@@ -112,16 +140,24 @@ mediscan-frontend/
 User visits app
 ↓
 /login page
-↓
-Sign in with Supabase Auth
+├── Google OAuth (one click)
+└── Email + Password
 ↓
 ProtectedRoute checks session
 ↓
 /dashboard
-├── Run predictions
-├── View feature importance
+├── Run AI predictions
+├── View confidence intervals
+├── See feature importance
 ├── Simulate what-if scenarios
+├── Download PDF report
 └── View prediction history
+↓
+/profile
+├── Edit name + username
+├── Upload avatar
+├── View stats
+└── View risk trend chart
 
 ---
 
@@ -130,12 +166,13 @@ ProtectedRoute checks session
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/` | Health check |
-| POST | `/predict/diabetes` | Diabetes prediction + feature importance |
-| POST | `/predict/heart` | Heart disease prediction + feature importance |
-| POST | `/predict/parkinsons` | Parkinson's prediction + feature importance |
+| POST | `/predict/diabetes` | Diabetes prediction + CI + features |
+| POST | `/predict/heart` | Heart disease prediction + CI + features |
+| POST | `/predict/parkinsons` | Parkinson's prediction + CI + features |
 | POST | `/whatif/diabetes` | Diabetes what-if simulation |
 | POST | `/whatif/heart` | Heart disease what-if simulation |
 | POST | `/whatif/parkinsons` | Parkinson's what-if simulation |
+| POST | `/generate-report` | PDF report generation |
 
 ---
 
@@ -163,7 +200,7 @@ uvicorn main:app --reload
 
 ## 💼 Interview Talking Points
 
-> *"I built a full stack AI web application using React and FastAPI that predicts risk for 3 diseases. It features real Supabase authentication, 3 scikit-learn ML models served via REST API, feature importance analysis, what-if health simulations, prediction history stored in PostgreSQL, and a Cyber-Brutalism UI with Framer Motion animations. Fully deployed on Vercel and Render."*
+> *"I built a production-grade full stack AI web app with React, FastAPI, and Supabase. It has Google OAuth authentication, 3 scikit-learn ML models with 95% confidence intervals and feature importance analysis, what-if health simulations, a risk trend chart using Recharts, PDF report export using ReportLab, user profiles with avatar upload to Supabase Storage, and a Cyber-Brutalism UI with Framer Motion animations. Fully deployed on Vercel and Render."*
 
 ---
 
