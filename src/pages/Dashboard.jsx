@@ -235,6 +235,35 @@ function Dashboard() {
     setLoading(false)
   }
 
+  const handleDownloadPDF = async () => {
+    if (!result || !user) return
+    try {
+      const response = await axios.post(
+        `${API}/generate-report`,
+        {
+          username: user?.user_metadata?.username || user?.email?.split('@')[0] || 'User',
+          disease: activeTab,
+          risk: result.risk,
+          probability: result.probability,
+          top_features: result.top_features || [],
+          whatif: whatif || {},
+          input_data: activeTab === 'diabetes' ? diabetes : activeTab === 'heart' ? heart : park,
+        },
+        { responseType: 'blob' }
+      )
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `MediScan_Report_${activeTab}_${Date.now()}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      alert('Could not generate PDF. Make sure backend is running!')
+    }
+  }
+
   const updateField = (setter, field, value) => setter(prev => ({ ...prev, [field]: parseFloat(value) || 0 }))
 
   const tabs = [
@@ -512,8 +541,6 @@ function Dashboard() {
 
             {/* RESULT PANEL */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-              {/* Result card */}
               <AnimatePresence mode="wait">
                 {!result && !loading && (
                   <motion.div
@@ -565,17 +592,12 @@ function Dashboard() {
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   >
                     {/* Risk badge */}
-                    <div
-                      className="glass"
-                      style={{
-                        padding: '1.5rem',
-                        border: `2px solid ${result.risk === 'HIGH' ? '#ff444460' : '#00ff9560'}`,
-                        textAlign: 'center',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        marginBottom: '1rem',
-                      }}
-                    >
+                    <div className="glass" style={{
+                      padding: '1.5rem',
+                      border: `2px solid ${result.risk === 'HIGH' ? '#ff444460' : '#00ff9560'}`,
+                      textAlign: 'center', position: 'relative',
+                      overflow: 'hidden', marginBottom: '1rem',
+                    }}>
                       <div style={{
                         position: 'absolute', inset: 0,
                         background: result.risk === 'HIGH'
@@ -609,8 +631,7 @@ function Dashboard() {
                         </span>
                         <span style={{
                           fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem',
-                          color: result.risk === 'HIGH' ? '#ff4444' : '#00ff95',
-                          letterSpacing: '2px',
+                          color: result.risk === 'HIGH' ? '#ff4444' : '#00ff95', letterSpacing: '2px',
                         }}>
                           <AnimatedNumber value={result.probability} suffix="%" />
                         </span>
@@ -668,16 +689,14 @@ function Dashboard() {
                           fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem',
                         }}>🔮 WHAT-IF SIMULATOR</p>
                         {Object.entries(whatif).map(([scenario, prob], i) => (
-                          <motion.div
-                            key={i}
+                          <motion.div key={i}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.1 }}
                             style={{
                               background: 'rgba(0,180,255,0.05)',
                               border: '1px solid rgba(0,180,255,0.15)',
-                              borderRadius: 8, padding: '0.6rem 0.8rem',
-                              marginBottom: '0.5rem',
+                              borderRadius: 8, padding: '0.6rem 0.8rem', marginBottom: '0.5rem',
                             }}
                           >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -695,14 +714,13 @@ function Dashboard() {
                     )}
 
                     {/* Health tips */}
-                    <div className="glass" style={{ padding: '1.2rem' }}>
+                    <div className="glass" style={{ padding: '1.2rem', marginBottom: '1rem' }}>
                       <p style={{
                         fontFamily: "'Space Mono', monospace", color: activeColor,
                         fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem',
                       }}>💡 HEALTH RECOMMENDATIONS</p>
                       {getTips(activeTab, result.risk).map((tip, i) => (
-                        <motion.div
-                          key={i}
+                        <motion.div key={i}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.08 }}
@@ -714,19 +732,33 @@ function Dashboard() {
                         >{tip}</motion.div>
                       ))}
                     </div>
+
+                    {/* PDF Download Button */}
+                    <MagneticButton
+                      onClick={handleDownloadPDF}
+                      style={{
+                        width: '100%', padding: '0.9rem',
+                        background: 'linear-gradient(90deg, #ff006e, #00b4ff)',
+                        border: 'none', borderRadius: 12,
+                        color: '#ffffff', fontSize: '0.95rem',
+                        fontWeight: 900, letterSpacing: '3px',
+                        cursor: 'pointer',
+                        fontFamily: "'Bebas Neue', sans-serif",
+                        boxShadow: '0 0 30px rgba(255,0,110,0.3)',
+                      }}
+                    >
+                      📄 DOWNLOAD PDF REPORT
+                    </MagneticButton>
+
                   </motion.div>
                 )}
 
                 {result?.error && (
-                  <motion.div
-                    key="error"
-                    className="glass"
-                    style={{
-                      padding: '1.2rem',
-                      border: '1px solid rgba(255,68,68,0.4)',
-                      color: '#ff6b6b', fontSize: '0.85rem',
-                    }}
-                  >⚠ {result.error}</motion.div>
+                  <motion.div key="error" className="glass" style={{
+                    padding: '1.2rem',
+                    border: '1px solid rgba(255,68,68,0.4)',
+                    color: '#ff6b6b', fontSize: '0.85rem',
+                  }}>⚠ {result.error}</motion.div>
                 )}
               </AnimatePresence>
             </div>
