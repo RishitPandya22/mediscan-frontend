@@ -1,12 +1,13 @@
-# 🏥 MediScan AI — Multi-Disease Risk Predictor
+# 🏥 MediScan AI — Multi-Disease Risk Predictor v2.0
 
-![MediScan AI](https://img.shields.io/badge/MediScan-AI-00ff95?style=for-the-badge&logo=react&logoColor=black)
+![MediScan AI](https://img.shields.io/badge/MediScan-AI_v2.0-00ff95?style=for-the-badge&logo=react&logoColor=black)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-Animations-FF0055?style=for-the-badge&logo=framer&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=black)
+![Supabase](https://img.shields.io/badge/Supabase-Auth_+_DB-3ECF8E?style=for-the-badge&logo=supabase&logoColor=black)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)
 
-> An AI-powered early disease risk detection web application built with React, FastAPI, and scikit-learn. Users can register, log in, and get instant risk predictions for Diabetes, Heart Disease, and Parkinson's Disease using trained ML models.
+> A full stack AI-powered early disease risk detection web application. Built with React, FastAPI, scikit-learn, and Supabase. Features real authentication, 3 trained ML models, feature importance analysis, what-if simulation, prediction history, and a Cyber-Brutalism dark UI with Framer Motion animations.
 
 🌐 **Live App:** [mediscan-frontend-ruby.vercel.app](https://mediscan-frontend-ruby.vercel.app)
 🔧 **Backend API:** [mediscan-backend-lmhf.onrender.com](https://mediscan-backend-lmhf.onrender.com)
@@ -16,25 +17,51 @@
 ## 🎯 What Does This App Do?
 
 MediScan AI allows anyone to:
-- Create a secure account and log in
-- Input personal health vitals and biomarkers
+- Create a secure account and log in with protected routes
+- Input personal health vitals and biomarkers via interactive sliders
 - Get an instant AI-powered risk assessment for 3 diseases
-- Receive personalised health recommendations based on their result
-
-This is a full stack data science application — not just a notebook or a Streamlit demo. It has real authentication, a REST API backend, trained ML models, and is fully deployed on the internet.
+- See which health factors are driving the risk (feature importance)
+- Simulate "what-if" scenarios — what happens if you improve your health metrics
+- View their full prediction history saved to the cloud
+- Receive personalised health recommendations based on results
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **Real Authentication** — Supabase-powered signup/login with protected routes
-- 🩸 **Diabetes Predictor** — Random Forest trained on Pima Indians Diabetes Dataset
-- 🫀 **Heart Disease Predictor** — Gradient Boosting trained on Cleveland Heart Disease Dataset
-- 🫁 **Parkinson's Predictor** — Gradient Boosting trained on UCI Parkinson's Voice Dataset
-- 📊 **Risk Probability Bar** — Visual indicator showing exact risk percentage
-- 💡 **Health Recommendations** — Personalised tips based on prediction result
-- 🌐 **Fully Deployed** — Live on Vercel (frontend) + Render (backend)
-- 🎨 **Terminal Dark UI** — Bloomberg/medical terminal aesthetic
+### 🔐 Authentication
+- Supabase-powered signup & login
+- Protected routes — dashboard inaccessible without login
+- Username + full name stored in Supabase profiles table
+- Session persistence across page refreshes
+
+### 🧠 AI Predictions
+- 🩸 **Diabetes Predictor** — Random Forest trained on Pima Indians Dataset
+- 🫀 **Heart Disease Predictor** — Gradient Boosting on Cleveland Dataset
+- 🫁 **Parkinson's Predictor** — Gradient Boosting on UCI Voice Dataset
+
+### 📊 Advanced Analytics
+- **Feature Importance** — See exactly which inputs drove the prediction
+- **What-If Simulator** — Simulate health improvements and see risk change
+- **Animated Probability Bar** — Liquid fill animation showing exact risk %
+- **Animated Number Counter** — Risk probability counts up dramatically
+
+### 📋 Prediction History
+- Every prediction saved to Supabase database
+- View last 10 predictions in collapsible history panel
+- Disease type, risk level, probability, and date all stored
+
+### 🎨 UI/UX
+- Cyber-Brutalism dark terminal aesthetic
+- Framer Motion page transitions and micro-animations
+- Custom animated cursor with follower
+- Magnetic buttons that follow cursor movement
+- Glitch effect on logo
+- Floating animated orbs
+- Animated mesh gradient background
+- CRT scanline overlay
+- Glassmorphic cards with heavy backdrop blur
+- Fully responsive layout
 
 ---
 
@@ -43,11 +70,11 @@ This is a full stack data science application — not just a notebook or a Strea
 | Layer | Technology |
 |---|---|
 | Frontend | React 18 + Vite |
-| Styling | CSS-in-JS (inline styles) |
+| Animations | Framer Motion |
 | Authentication | Supabase Auth |
 | Database | Supabase PostgreSQL |
 | Backend | FastAPI (Python) |
-| ML Models | scikit-learn (Random Forest, Gradient Boosting) |
+| ML Models | scikit-learn |
 | Frontend Deploy | Vercel |
 | Backend Deploy | Render |
 
@@ -57,9 +84,9 @@ This is a full stack data science application — not just a notebook or a Strea
 
 | Disease | Algorithm | Dataset | Accuracy |
 |---|---|---|---|
-| 🩸 Diabetes | Random Forest | Pima Indians Diabetes (768 rows) | ~73% |
-| 🫀 Heart Disease | Gradient Boosting | Cleveland Heart Disease (1025 rows) | ~93% |
-| 🫁 Parkinson's | Gradient Boosting | UCI Parkinson's Voice (195 rows) | ~95% |
+| 🩸 Diabetes | Random Forest (100 trees) | Pima Indians (768 rows) | ~73% |
+| 🫀 Heart Disease | Gradient Boosting (100 trees) | Cleveland (1025 rows) | ~93% |
+| 🫁 Parkinson's | Gradient Boosting (100 trees) | UCI Voice (195 rows) | ~95% |
 
 ---
 
@@ -67,13 +94,14 @@ This is a full stack data science application — not just a notebook or a Strea
 mediscan-frontend/
 ├── src/
 │   ├── pages/
-│   │   ├── Login.jsx          ← Login page
-│   │   ├── Register.jsx       ← Register page
-│   │   └── Dashboard.jsx      ← Main predictor dashboard
+│   │   ├── Login.jsx           ← Animated login with magnetic button
+│   │   ├── Register.jsx        ← Registration with validation
+│   │   └── Dashboard.jsx       ← Main predictor + history + what-if
 │   ├── components/
-│   │   └── ProtectedRoute.jsx ← Auth guard component
-│   ├── supabase.js            ← Supabase client config
-│   └── App.jsx                ← Router setup
+│   │   └── ProtectedRoute.jsx  ← Auth guard component
+│   ├── supabase.js             ← Supabase client config
+│   ├── App.jsx                 ← Router setup
+│   └── index.css               ← Global styles + animations
 ├── public/
 ├── index.html
 └── package.json
@@ -89,9 +117,25 @@ Sign in with Supabase Auth
 ↓
 ProtectedRoute checks session
 ↓
-/dashboard (ML Predictor)
+/dashboard
+├── Run predictions
+├── View feature importance
+├── Simulate what-if scenarios
+└── View prediction history
 
-New users can register at `/register` — credentials are stored securely in Supabase.
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Health check |
+| POST | `/predict/diabetes` | Diabetes prediction + feature importance |
+| POST | `/predict/heart` | Heart disease prediction + feature importance |
+| POST | `/predict/parkinsons` | Parkinson's prediction + feature importance |
+| POST | `/whatif/diabetes` | Diabetes what-if simulation |
+| POST | `/whatif/heart` | Heart disease what-if simulation |
+| POST | `/whatif/parkinsons` | Parkinson's what-if simulation |
 
 ---
 
@@ -117,14 +161,9 @@ uvicorn main:app --reload
 
 ---
 
-## 📡 API Endpoints
+## 💼 Interview Talking Points
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/` | Health check |
-| POST | `/predict/diabetes` | Diabetes risk prediction |
-| POST | `/predict/heart` | Heart disease risk prediction |
-| POST | `/predict/parkinsons` | Parkinson's risk prediction |
+> *"I built a full stack AI web application using React and FastAPI that predicts risk for 3 diseases. It features real Supabase authentication, 3 scikit-learn ML models served via REST API, feature importance analysis, what-if health simulations, prediction history stored in PostgreSQL, and a Cyber-Brutalism UI with Framer Motion animations. Fully deployed on Vercel and Render."*
 
 ---
 
@@ -139,7 +178,7 @@ Master of Data Science Student @ University of Adelaide, South Australia 🇦�
 
 ## ⚠️ Disclaimer
 
-This application is built for **educational and portfolio purposes only**. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical decisions.
+This application is built for **educational and portfolio purposes only**. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider.
 
 ---
 
