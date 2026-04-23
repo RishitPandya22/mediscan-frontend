@@ -1,7 +1,140 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../supabase'
 
+// ─────────────────────────────────────────────
+// CUSTOM CURSOR
+// ─────────────────────────────────────────────
+function CustomCursor() {
+  const [pos, setPos] = useState({ x: -100, y: -100 })
+  const [follower, setFollower] = useState({ x: -100, y: -100 })
+
+  useEffect(() => {
+    const moveCursor = (e) => {
+      setPos({ x: e.clientX, y: e.clientY })
+      setTimeout(() => setFollower({ x: e.clientX, y: e.clientY }), 80)
+    }
+    window.addEventListener('mousemove', moveCursor)
+    return () => window.removeEventListener('mousemove', moveCursor)
+  }, [])
+
+  return (
+    <>
+      <motion.div
+        animate={{ x: pos.x - 6, y: pos.y - 6 }}
+        transition={{ type: 'spring', stiffness: 800, damping: 40 }}
+        style={{
+          position: 'fixed', width: 12, height: 12,
+          background: '#00ff95', borderRadius: '50%',
+          pointerEvents: 'none', zIndex: 99999,
+          mixBlendMode: 'difference',
+        }}
+      />
+      <motion.div
+        animate={{ x: follower.x - 18, y: follower.y - 18 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+        style={{
+          position: 'fixed', width: 36, height: 36,
+          border: '1px solid rgba(0,255,149,0.4)',
+          borderRadius: '50%', pointerEvents: 'none', zIndex: 99998,
+        }}
+      />
+    </>
+  )
+}
+
+// ─────────────────────────────────────────────
+// MAGNETIC BUTTON
+// ─────────────────────────────────────────────
+function MagneticButton({ children, onClick, disabled, style }) {
+  const ref = useRef(null)
+  const [pos, setPos] = useState({ x: 0, y: 0 })
+
+  const handleMouseMove = (e) => {
+    const rect = ref.current.getBoundingClientRect()
+    const x = e.clientX - rect.left - rect.width / 2
+    const y = e.clientY - rect.top - rect.height / 2
+    setPos({ x: x * 0.3, y: y * 0.3 })
+  }
+
+  const handleMouseLeave = () => setPos({ x: 0, y: 0 })
+
+  return (
+    <motion.button
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ x: pos.x, y: pos.y }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      onClick={onClick}
+      disabled={disabled}
+      style={style}
+    >
+      {children}
+    </motion.button>
+  )
+}
+
+// ─────────────────────────────────────────────
+// GLITCH TEXT
+// ─────────────────────────────────────────────
+function GlitchText({ text, style }) {
+  return (
+    <div style={{ position: 'relative', display: 'inline-block', ...style }}>
+      <span style={{ position: 'relative', zIndex: 2 }}>{text}</span>
+      <span style={{
+        position: 'absolute', top: 0, left: 0,
+        color: '#00b4ff', zIndex: 1,
+        animation: 'glitch 3s infinite linear',
+        opacity: 0.7,
+      }}>{text}</span>
+      <span style={{
+        position: 'absolute', top: 0, left: 0,
+        color: '#ff006e', zIndex: 1,
+        animation: 'glitch2 3s infinite linear',
+        opacity: 0.7,
+      }}>{text}</span>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// INPUT FIELD COMPONENT
+// ─────────────────────────────────────────────
+function InputField({ label, type, placeholder, value, onChange, icon, focused, onFocus, onBlur, onKeyDown }) {
+  return (
+    <div style={{ marginBottom: '1rem' }}>
+      <label style={{
+        display: 'block',
+        fontFamily: "'Space Mono', monospace",
+        color: focused ? '#00ff95' : 'rgba(0,255,149,0.5)',
+        fontSize: '0.65rem', letterSpacing: '2px',
+        marginBottom: '0.4rem', transition: 'color 0.3s',
+      }}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        <span style={{
+          position: 'absolute', left: '1rem', top: '50%',
+          transform: 'translateY(-50%)', fontSize: '0.9rem', opacity: 0.5,
+        }}>{icon}</span>
+        <input
+          className="cyber-input"
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// MAIN REGISTER PAGE
+// ─────────────────────────────────────────────
 function Register() {
   const navigate = useNavigate()
   const [fullName, setFullName] = useState('')
@@ -12,31 +145,25 @@ function Register() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [focused, setFocused] = useState('')
 
   const handleRegister = async () => {
     if (!fullName || !username || !email || !password || !confirm) {
-      setError('Please fill in all fields')
-      return
+      setError('Please fill in all fields'); return
     }
     if (password !== confirm) {
-      setError('Passwords do not match!')
-      return
+      setError('Passwords do not match!'); return
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
+      setError('Password must be at least 6 characters'); return
     }
 
     setLoading(true)
     setError('')
 
-    // Sign up with Supabase Auth
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, username }
-      }
+      email, password,
+      options: { data: { full_name: fullName, username } }
     })
 
     if (signUpError) {
@@ -45,15 +172,10 @@ function Register() {
       return
     }
 
-    // Save username + full name to profiles table
     if (data.user) {
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          id: data.user.id,
-          username,
-          full_name: fullName
-        })
+        .insert({ id: data.user.id, username, full_name: fullName })
 
       if (profileError && !profileError.message.includes('duplicate')) {
         setError(profileError.message)
@@ -68,289 +190,221 @@ function Register() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.grid} />
-      <div style={{...styles.orb, top: '10%', left: '15%', background: '#00ff9520'}} />
-      <div style={{...styles.orb, top: '60%', right: '10%', background: '#00b4ff20'}} />
+    <>
+      <CustomCursor />
+      <div className="mesh-bg" />
+      <div className="grid-overlay" />
+      <div className="scanline" />
 
-      <div style={styles.card}>
-        {/* Logo */}
-        <div style={styles.logoSection}>
-          <div style={styles.logoIcon}>⚕</div>
-          <h1 style={styles.logoText}>MEDISCAN AI</h1>
-          <p style={styles.logoSub}>[ CREATE YOUR ACCOUNT ]</p>
-        </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 2,
+          padding: '2rem',
+        }}
+      >
+        {/* Floating orbs */}
+        <motion.div
+          animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            position: 'fixed', top: '10%', right: '10%',
+            width: 350, height: 350, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(0,255,149,0.07), transparent)',
+            filter: 'blur(40px)', pointerEvents: 'none',
+          }}
+        />
+        <motion.div
+          animate={{ y: [0, 20, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+          style={{
+            position: 'fixed', bottom: '10%', left: '10%',
+            width: 400, height: 400, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,0,110,0.06), transparent)',
+            filter: 'blur(40px)', pointerEvents: 'none',
+          }}
+        />
 
-        <div style={styles.divider} />
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="glass-strong"
+          style={{
+            width: '100%', maxWidth: 480,
+            padding: '3rem', position: 'relative', overflow: 'hidden',
+          }}
+        >
+          {/* Top accent line */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+            background: 'linear-gradient(90deg, transparent, #ff006e, #00b4ff, transparent)',
+          }} />
 
-        <div style={styles.form}>
-          <p style={styles.welcomeText}>JOIN MEDISCAN</p>
-          <p style={styles.welcomeSub}>Create your free account to get started</p>
-
-          {error && <div style={styles.errorBox}>⚠ {error}</div>}
-          {success && <div style={styles.successBox}>✅ {success}</div>}
-
-          {/* Full Name */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>FULL NAME</label>
-            <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>👤</span>
-              <input
-                style={styles.input}
-                type="text"
-                placeholder="Rishit Pandya"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Username */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>USERNAME</label>
-            <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>@</span>
-              <input
-                style={styles.input}
-                type="text"
-                placeholder="rishit_pandya"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>EMAIL ADDRESS</label>
-            <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>✉</span>
-              <input
-                style={styles.input}
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>PASSWORD</label>
-            <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>🔒</span>
-              <input
-                style={styles.input}
-                type="password"
-                placeholder="Min. 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>CONFIRM PASSWORD</label>
-            <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>🔒</span>
-              <input
-                style={styles.input}
-                type="password"
-                placeholder="Repeat your password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-              />
-            </div>
-          </div>
-
-          <button
-            style={{
-              ...styles.button,
-              opacity: loading ? 0.7 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-            onClick={handleRegister}
-            disabled={loading}
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            style={{ textAlign: 'center', marginBottom: '2rem' }}
           >
-            {loading ? '⟳ CREATING ACCOUNT...' : '🚀 CREATE ACCOUNT'}
-          </button>
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              style={{ fontSize: '3rem', marginBottom: '0.5rem' }}
+            >⚕</motion.div>
 
-          <p style={styles.loginText}>
-            Already have an account?{' '}
-            <Link to="/login" style={styles.loginLink}>
-              SIGN IN →
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+            <GlitchText text="MEDISCAN AI" style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: '2.8rem',
+              letterSpacing: '6px',
+              background: 'linear-gradient(90deg, #00ff95, #00b4ff)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }} />
+
+            <p style={{
+              fontFamily: "'Space Mono', monospace",
+              color: 'rgba(0,255,149,0.5)',
+              fontSize: '0.65rem',
+              letterSpacing: '3px',
+              marginTop: '0.3rem',
+            }}>[ CREATE YOUR ACCOUNT ]</p>
+          </motion.div>
+
+          {/* Divider */}
+          <div style={{
+            height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(0,255,149,0.3), transparent)',
+            marginBottom: '2rem',
+          }} />
+
+          {/* Form */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: '1.6rem', letterSpacing: '3px',
+              color: '#e6edf3', marginBottom: '0.3rem',
+            }}>JOIN MEDISCAN</p>
+            <p style={{
+              color: '#8b949e', fontSize: '0.85rem',
+              marginBottom: '1.5rem',
+            }}>Create your free account to get started</p>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    background: 'rgba(255,68,68,0.1)',
+                    border: '1px solid rgba(255,68,68,0.4)',
+                    borderRadius: 8, padding: '0.75rem 1rem',
+                    color: '#ff6b6b', fontSize: '0.85rem',
+                    marginBottom: '1rem',
+                  }}
+                >⚠ {error}</motion.div>
+              )}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    background: 'rgba(0,255,149,0.1)',
+                    border: '1px solid rgba(0,255,149,0.4)',
+                    borderRadius: 8, padding: '0.75rem 1rem',
+                    color: '#00ff95', fontSize: '0.85rem',
+                    marginBottom: '1rem',
+                  }}
+                >✅ {success}</motion.div>
+              )}
+            </AnimatePresence>
+
+            <InputField
+              label="FULL NAME" type="text" placeholder="Rishit Pandya"
+              value={fullName} onChange={(e) => setFullName(e.target.value)}
+              icon="👤" focused={focused === 'fullName'}
+              onFocus={() => setFocused('fullName')}
+              onBlur={() => setFocused('')}
+            />
+            <InputField
+              label="USERNAME" type="text" placeholder="rishit_pandya"
+              value={username} onChange={(e) => setUsername(e.target.value)}
+              icon="@" focused={focused === 'username'}
+              onFocus={() => setFocused('username')}
+              onBlur={() => setFocused('')}
+            />
+            <InputField
+              label="EMAIL ADDRESS" type="email" placeholder="your@email.com"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              icon="✉" focused={focused === 'email'}
+              onFocus={() => setFocused('email')}
+              onBlur={() => setFocused('')}
+            />
+            <InputField
+              label="PASSWORD" type="password" placeholder="Min. 6 characters"
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              icon="🔒" focused={focused === 'password'}
+              onFocus={() => setFocused('password')}
+              onBlur={() => setFocused('')}
+            />
+            <InputField
+              label="CONFIRM PASSWORD" type="password" placeholder="Repeat your password"
+              value={confirm} onChange={(e) => setConfirm(e.target.value)}
+              icon="🔒" focused={focused === 'confirm'}
+              onFocus={() => setFocused('confirm')}
+              onBlur={() => setFocused('')}
+              onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
+            />
+
+            <MagneticButton
+              onClick={handleRegister}
+              disabled={loading}
+              style={{
+                width: '100%', padding: '1rem',
+                background: loading
+                  ? 'rgba(0,255,149,0.3)'
+                  : 'linear-gradient(90deg, #ff006e, #00b4ff)',
+                border: 'none', borderRadius: 10,
+                color: '#ffffff', fontSize: '1rem',
+                fontWeight: 700, letterSpacing: '3px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontFamily: "'Bebas Neue', sans-serif",
+                boxShadow: loading ? 'none' : '0 0 30px rgba(255,0,110,0.3)',
+                marginTop: '0.5rem',
+              }}
+            >
+              {loading ? '⟳  CREATING ACCOUNT...' : '🚀  CREATE ACCOUNT'}
+            </MagneticButton>
+
+            <p style={{
+              textAlign: 'center', marginTop: '1.5rem',
+              color: '#8b949e', fontSize: '0.85rem',
+            }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{
+                color: '#00ff95', fontWeight: 600, letterSpacing: '1px',
+              }}>SIGN IN →</Link>
+            </p>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </>
   )
-}
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    background: '#020b18',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: "'Courier New', monospace",
-    position: 'relative',
-    overflow: 'hidden',
-    padding: '2rem 0',
-  },
-  grid: {
-    position: 'absolute',
-    inset: 0,
-    backgroundImage: `
-      linear-gradient(rgba(0,255,149,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,149,0.03) 1px, transparent 1px)
-    `,
-    backgroundSize: '40px 40px',
-    zIndex: 0,
-  },
-  orb: {
-    position: 'absolute',
-    width: '400px',
-    height: '400px',
-    borderRadius: '50%',
-    filter: 'blur(80px)',
-    zIndex: 0,
-  },
-  card: {
-    background: 'linear-gradient(135deg, #0d1f2d, #0a1628)',
-    border: '1px solid #00ff9530',
-    borderRadius: '20px',
-    padding: '3rem',
-    width: '100%',
-    maxWidth: '440px',
-    position: 'relative',
-    zIndex: 1,
-    boxShadow: '0 0 60px rgba(0,255,149,0.08), 0 0 120px rgba(0,180,255,0.05)',
-  },
-  logoSection: {
-    textAlign: 'center',
-    marginBottom: '1.5rem',
-  },
-  logoIcon: {
-    fontSize: '3rem',
-    marginBottom: '0.5rem',
-  },
-  logoText: {
-    fontFamily: "'Courier New', monospace",
-    fontSize: '1.8rem',
-    fontWeight: '900',
-    background: 'linear-gradient(90deg, #00ff95, #00b4ff)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    letterSpacing: '4px',
-    margin: '0',
-  },
-  logoSub: {
-    color: '#00ff9560',
-    fontSize: '0.7rem',
-    letterSpacing: '2px',
-    marginTop: '0.3rem',
-  },
-  divider: {
-    height: '1px',
-    background: 'linear-gradient(90deg, transparent, #00ff9540, transparent)',
-    marginBottom: '1.5rem',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.85rem',
-  },
-  welcomeText: {
-    color: '#c9d1d9',
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    letterSpacing: '3px',
-    margin: '0',
-  },
-  welcomeSub: {
-    color: '#8b949e',
-    fontSize: '0.85rem',
-    margin: '0',
-  },
-  errorBox: {
-    background: '#2d0d0d',
-    border: '1px solid #ff444460',
-    borderRadius: '8px',
-    padding: '0.75rem 1rem',
-    color: '#ff6b6b',
-    fontSize: '0.85rem',
-  },
-  successBox: {
-    background: '#0d2818',
-    border: '1px solid #00ff9560',
-    borderRadius: '8px',
-    padding: '0.75rem 1rem',
-    color: '#00ff95',
-    fontSize: '0.85rem',
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.4rem',
-  },
-  label: {
-    color: '#00ff9580',
-    fontSize: '0.7rem',
-    letterSpacing: '2px',
-  },
-  inputWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    background: '#020b18',
-    border: '1px solid #00ff9530',
-    borderRadius: '8px',
-    padding: '0 1rem',
-  },
-  inputIcon: {
-    marginRight: '0.75rem',
-    fontSize: '0.9rem',
-    opacity: 0.6,
-  },
-  input: {
-    flex: 1,
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    color: '#c9d1d9',
-    fontSize: '0.95rem',
-    padding: '0.85rem 0',
-    fontFamily: "'Courier New', monospace",
-  },
-  button: {
-    background: 'linear-gradient(90deg, #00ff95, #00b4ff)',
-    color: '#020b18',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '0.9rem',
-    fontSize: '0.95rem',
-    fontWeight: '900',
-    letterSpacing: '2px',
-    cursor: 'pointer',
-    marginTop: '0.5rem',
-    fontFamily: "'Courier New', monospace",
-  },
-  loginText: {
-    color: '#8b949e',
-    fontSize: '0.85rem',
-    textAlign: 'center',
-    margin: '0',
-  },
-  loginLink: {
-    color: '#00ff95',
-    textDecoration: 'none',
-    fontWeight: 'bold',
-    letterSpacing: '1px',
-  },
 }
 
 export default Register
