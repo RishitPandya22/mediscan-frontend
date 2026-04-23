@@ -5,7 +5,7 @@ import { supabase } from '../supabase'
 import axios from 'axios'
 
 const API = "https://mediscan-backend-lmhf.onrender.com"
-
+// const API = "http://127.0.0.1:8000"
 function CustomCursor() {
   const [pos, setPos] = useState({ x: -100, y: -100 })
   const [follower, setFollower] = useState({ x: -100, y: -100 })
