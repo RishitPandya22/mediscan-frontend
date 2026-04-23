@@ -1,18 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../supabase'
 import axios from 'axios'
 
 const API = "https://mediscan-backend-lmhf.onrender.com"
 
-// ─────────────────────────────────────────────
-// CUSTOM CURSOR
-// ─────────────────────────────────────────────
 function CustomCursor() {
   const [pos, setPos] = useState({ x: -100, y: -100 })
   const [follower, setFollower] = useState({ x: -100, y: -100 })
-
   useEffect(() => {
     const moveCursor = (e) => {
       setPos({ x: e.clientX, y: e.clientY })
@@ -21,35 +17,18 @@ function CustomCursor() {
     window.addEventListener('mousemove', moveCursor)
     return () => window.removeEventListener('mousemove', moveCursor)
   }, [])
-
   return (
     <>
-      <motion.div
-        animate={{ x: pos.x - 6, y: pos.y - 6 }}
+      <motion.div animate={{ x: pos.x - 6, y: pos.y - 6 }}
         transition={{ type: 'spring', stiffness: 800, damping: 40 }}
-        style={{
-          position: 'fixed', width: 12, height: 12,
-          background: '#00ff95', borderRadius: '50%',
-          pointerEvents: 'none', zIndex: 99999,
-          mixBlendMode: 'difference',
-        }}
-      />
-      <motion.div
-        animate={{ x: follower.x - 18, y: follower.y - 18 }}
+        style={{ position: 'fixed', width: 12, height: 12, background: '#00ff95', borderRadius: '50%', pointerEvents: 'none', zIndex: 99999, mixBlendMode: 'difference' }} />
+      <motion.div animate={{ x: follower.x - 18, y: follower.y - 18 }}
         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-        style={{
-          position: 'fixed', width: 36, height: 36,
-          border: '1px solid rgba(0,255,149,0.4)',
-          borderRadius: '50%', pointerEvents: 'none', zIndex: 99998,
-        }}
-      />
+        style={{ position: 'fixed', width: 36, height: 36, border: '1px solid rgba(0,255,149,0.4)', borderRadius: '50%', pointerEvents: 'none', zIndex: 99998 }} />
     </>
   )
 }
 
-// ─────────────────────────────────────────────
-// MAGNETIC BUTTON
-// ─────────────────────────────────────────────
 function MagneticButton({ children, onClick, disabled, style }) {
   const ref = useRef(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
@@ -58,25 +37,18 @@ function MagneticButton({ children, onClick, disabled, style }) {
     setPos({ x: (e.clientX - rect.left - rect.width / 2) * 0.3, y: (e.clientY - rect.top - rect.height / 2) * 0.3 })
   }
   return (
-    <motion.button ref={ref}
-      onMouseMove={handleMouseMove} onMouseLeave={() => setPos({ x: 0, y: 0 })}
-      animate={{ x: pos.x, y: pos.y }}
-      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-      onClick={onClick} disabled={disabled} style={style}
-    >{children}</motion.button>
+    <motion.button ref={ref} onMouseMove={handleMouseMove} onMouseLeave={() => setPos({ x: 0, y: 0 })}
+      animate={{ x: pos.x, y: pos.y }} transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      onClick={onClick} disabled={disabled} style={style}>{children}</motion.button>
   )
 }
 
-// ─────────────────────────────────────────────
-// ANIMATED NUMBER
-// ─────────────────────────────────────────────
 function AnimatedNumber({ value, suffix = '' }) {
   const [display, setDisplay] = useState(0)
   useEffect(() => {
     let start = 0
     const end = parseFloat(value)
-    const duration = 1500
-    const step = end / (duration / 16)
+    const step = end / (1500 / 16)
     const timer = setInterval(() => {
       start += step
       if (start >= end) { setDisplay(end); clearInterval(timer) }
@@ -87,35 +59,20 @@ function AnimatedNumber({ value, suffix = '' }) {
   return <span>{display}{suffix}</span>
 }
 
-// ─────────────────────────────────────────────
-// FORM FIELD
-// ─────────────────────────────────────────────
 function FormField({ field, value, color, onChange }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
-    >
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <label style={{ color: '#8b949e', fontSize: '0.75rem', fontFamily: "'Space Mono', monospace" }}>
-          {field.label}
-        </label>
-        <span style={{ color, fontSize: '0.8rem', fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>
-          {value}
-        </span>
+        <label style={{ color: '#8b949e', fontSize: '0.75rem', fontFamily: "'Space Mono', monospace" }}>{field.label}</label>
+        <span style={{ color, fontSize: '0.8rem', fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>{value}</span>
       </div>
       <input type="range" min={field.min} max={field.max} step={field.step}
-        value={value} onChange={(e) => onChange(e.target.value)}
-        style={{ accentColor: color }}
-      />
+        value={value} onChange={(e) => onChange(e.target.value)} style={{ accentColor: color }} />
     </motion.div>
   )
 }
 
-// ─────────────────────────────────────────────
-// HEALTH TIPS
-// ─────────────────────────────────────────────
 function getTips(disease, risk) {
   const tips = {
     diabetes: {
@@ -134,9 +91,6 @@ function getTips(disease, risk) {
   return tips[disease][risk]
 }
 
-// ─────────────────────────────────────────────
-// MAIN DASHBOARD
-// ─────────────────────────────────────────────
 function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
@@ -168,30 +122,20 @@ function Dashboard() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user)
-        loadHistory(session.user.id)
-      }
+      if (session?.user) { setUser(session.user); loadHistory(session.user.id) }
     })
   }, [])
 
   const loadHistory = async (userId) => {
-    const { data } = await supabase
-      .from('predictions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const { data } = await supabase.from('predictions').select('*')
+      .eq('user_id', userId).order('created_at', { ascending: false }).limit(10)
     if (data) setHistory(data)
   }
 
   const saveToHistory = async (userId, disease, resultData, inputData) => {
     await supabase.from('predictions').insert({
-      user_id: userId,
-      disease,
-      risk: resultData.risk,
-      probability: resultData.probability,
-      input_data: inputData,
+      user_id: userId, disease, risk: resultData.risk,
+      probability: resultData.probability, input_data: inputData,
     })
     loadHistory(userId)
   }
@@ -202,9 +146,7 @@ function Dashboard() {
   }
 
   const handlePredict = async () => {
-    setLoading(true)
-    setResult(null)
-    setWhatif(null)
+    setLoading(true); setResult(null); setWhatif(null)
     try {
       let predResponse, whatifResponse, inputData
       if (activeTab === 'diabetes') {
@@ -229,28 +171,19 @@ function Dashboard() {
       setResult(predResponse.data)
       setWhatif(whatifResponse.data.whatif)
       if (user) saveToHistory(user.id, activeTab, predResponse.data, inputData)
-    } catch {
-      setResult({ error: 'Could not connect to backend!' })
-    }
+    } catch { setResult({ error: 'Could not connect to backend!' }) }
     setLoading(false)
   }
 
   const handleDownloadPDF = async () => {
     if (!result || !user) return
     try {
-      const response = await axios.post(
-        `${API}/generate-report`,
-        {
-          username: user?.user_metadata?.username || user?.email?.split('@')[0] || 'User',
-          disease: activeTab,
-          risk: result.risk,
-          probability: result.probability,
-          top_features: result.top_features || [],
-          whatif: whatif || {},
-          input_data: activeTab === 'diabetes' ? diabetes : activeTab === 'heart' ? heart : park,
-        },
-        { responseType: 'blob' }
-      )
+      const response = await axios.post(`${API}/generate-report`, {
+        username: user?.user_metadata?.username || user?.email?.split('@')[0] || 'User',
+        disease: activeTab, risk: result.risk, probability: result.probability,
+        top_features: result.top_features || [], whatif: whatif || {},
+        input_data: activeTab === 'diabetes' ? diabetes : activeTab === 'heart' ? heart : park,
+      }, { responseType: 'blob' })
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -259,9 +192,7 @@ function Dashboard() {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-    } catch {
-      alert('Could not generate PDF. Make sure backend is running!')
-    }
+    } catch { alert('Could not generate PDF!') }
   }
 
   const updateField = (setter, field, value) => setter(prev => ({ ...prev, [field]: parseFloat(value) || 0 }))
@@ -337,22 +268,17 @@ function Dashboard() {
       <div style={{ position: 'relative', zIndex: 2, minHeight: '100vh' }}>
 
         {/* NAVBAR */}
-        <motion.nav
-          initial={{ y: -60, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+        <motion.nav initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           style={{
             position: 'sticky', top: 0, zIndex: 100,
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '0 2rem', height: 64,
             background: 'rgba(2,11,24,0.9)',
             borderBottom: '1px solid rgba(0,255,149,0.1)',
             backdropFilter: 'blur(20px)',
-          }}
-        >
+          }}>
           <div style={{
-            fontFamily: "'Bebas Neue', sans-serif",
-            fontSize: '1.4rem', letterSpacing: '4px',
+            fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.4rem', letterSpacing: '4px',
             background: 'linear-gradient(90deg, #00ff95, #00b4ff)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>⚕ MEDISCAN AI</div>
@@ -361,98 +287,62 @@ function Dashboard() {
             {tabs.map(tab => (
               <motion.button key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setResult(null); setWhatif(null) }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 style={{
                   background: activeTab === tab.id ? `${tab.color}15` : 'transparent',
                   border: activeTab === tab.id ? `1px solid ${tab.color}40` : '1px solid transparent',
                   color: activeTab === tab.id ? tab.color : '#8b949e',
                   padding: '0.4rem 1rem', borderRadius: 8,
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: '0.75rem', letterSpacing: '1px',
-                  cursor: 'pointer', transition: 'all 0.3s',
-                }}
-              >{tab.label}</motion.button>
+                  fontFamily: "'Space Mono', monospace", fontSize: '0.75rem',
+                  letterSpacing: '1px', cursor: 'pointer', transition: 'all 0.3s',
+                }}>{tab.label}</motion.button>
             ))}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
+            <motion.button whileHover={{ scale: 1.05 }}
               onClick={() => setShowHistory(!showHistory)}
               style={{
                 background: showHistory ? 'rgba(0,180,255,0.15)' : 'transparent',
-                border: '1px solid rgba(0,180,255,0.3)',
-                color: '#00b4ff', padding: '0.4rem 1rem',
-                borderRadius: 8, cursor: 'pointer',
+                border: '1px solid rgba(0,180,255,0.3)', color: '#00b4ff',
+                padding: '0.4rem 1rem', borderRadius: 8, cursor: 'pointer',
                 fontFamily: "'Space Mono', monospace", fontSize: '0.7rem',
-              }}
-            >📋 HISTORY</motion.button>
-            <span style={{
+              }}>📋 HISTORY</motion.button>
+
+            <Link to="/profile" style={{
               color: '#8b949e', fontSize: '0.8rem',
               fontFamily: "'Space Mono', monospace",
-            }}>👤 {user?.user_metadata?.username || user?.email?.split('@')[0]}</span>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              onClick={handleLogout}
+              border: '1px solid rgba(0,255,149,0.2)',
+              padding: '0.4rem 1rem', borderRadius: 8, transition: 'all 0.3s',
+            }}>👤 {user?.user_metadata?.username || user?.email?.split('@')[0]}</Link>
+
+            <motion.button whileHover={{ scale: 1.05 }} onClick={handleLogout}
               style={{
-                background: 'transparent',
-                border: '1px solid rgba(255,68,68,0.4)',
-                color: '#ff6b6b', padding: '0.4rem 0.8rem',
-                borderRadius: 8, cursor: 'pointer',
-                fontFamily: "'Space Mono', monospace", fontSize: '0.7rem',
-              }}
-            >LOGOUT</motion.button>
+                background: 'transparent', border: '1px solid rgba(255,68,68,0.4)',
+                color: '#ff6b6b', padding: '0.4rem 0.8rem', borderRadius: 8,
+                cursor: 'pointer', fontFamily: "'Space Mono', monospace", fontSize: '0.7rem',
+              }}>LOGOUT</motion.button>
           </div>
         </motion.nav>
 
         {/* HISTORY PANEL */}
         <AnimatePresence>
           {showHistory && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{
-                background: 'rgba(13,31,45,0.95)',
-                borderBottom: '1px solid rgba(0,180,255,0.2)',
-                padding: '1.5rem 2rem',
-                backdropFilter: 'blur(20px)',
-              }}
-            >
-              <p style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                color: '#00b4ff', fontSize: '1.2rem',
-                letterSpacing: '3px', marginBottom: '1rem',
-              }}>📋 PREDICTION HISTORY</p>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+              style={{ background: 'rgba(13,31,45,0.95)', borderBottom: '1px solid rgba(0,180,255,0.2)', padding: '1.5rem 2rem', backdropFilter: 'blur(20px)' }}>
+              <p style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#00b4ff', fontSize: '1.2rem', letterSpacing: '3px', marginBottom: '1rem' }}>📋 PREDICTION HISTORY</p>
               {history.length === 0 ? (
-                <p style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.8rem' }}>
-                  No predictions yet. Run your first analysis!
-                </p>
+                <p style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.8rem' }}>No predictions yet. Run your first analysis!</p>
               ) : (
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                   {history.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="glass"
-                      style={{ padding: '0.75rem 1rem', minWidth: 180 }}
-                    >
-                      <p style={{
-                        fontFamily: "'Bebas Neue', sans-serif",
-                        color: item.risk === 'HIGH' ? '#ff6b6b' : '#00ff95',
-                        fontSize: '1rem', letterSpacing: '2px',
-                      }}>
-                        {item.disease === 'diabetes' ? '🩸' : item.disease === 'heart' ? '🫀' : '🫁'}
-                        {' '}{item.risk} RISK
+                    <motion.div key={item.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                      className="glass" style={{ padding: '0.75rem 1rem', minWidth: 180 }}>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", color: item.risk === 'HIGH' ? '#ff6b6b' : '#00ff95', fontSize: '1rem', letterSpacing: '2px' }}>
+                        {item.disease === 'diabetes' ? '🩸' : item.disease === 'heart' ? '🫀' : '🫁'}{' '}{item.risk} RISK
                       </p>
-                      <p style={{ color: '#8b949e', fontSize: '0.75rem', fontFamily: "'Space Mono', monospace" }}>
-                        {item.probability}% probability
-                      </p>
-                      <p style={{ color: '#8b949e', fontSize: '0.65rem', marginTop: '0.3rem' }}>
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </p>
+                      <p style={{ color: '#8b949e', fontSize: '0.75rem', fontFamily: "'Space Mono', monospace" }}>{item.probability}% probability</p>
+                      <p style={{ color: '#8b949e', fontSize: '0.65rem', marginTop: '0.3rem' }}>{new Date(item.created_at).toLocaleDateString()}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -463,20 +353,8 @@ function Dashboard() {
 
         {/* MAIN CONTENT */}
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '2rem' }}>
-
-          {/* Page title */}
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            style={{ marginBottom: '1.5rem' }}
-          >
-            <h1 style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: '2.5rem', letterSpacing: '4px',
-              color: activeColor, margin: 0,
-              textShadow: `0 0 30px ${activeColor}40`,
-            }}>
+          <motion.div key={activeTab} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} style={{ marginBottom: '1.5rem' }}>
+            <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2.5rem', letterSpacing: '4px', color: activeColor, margin: 0, textShadow: `0 0 30px ${activeColor}40` }}>
               {activeTab === 'diabetes' && '🩸 DIABETES RISK ASSESSMENT'}
               {activeTab === 'heart' && '🫀 HEART DISEASE RISK ASSESSMENT'}
               {activeTab === 'parkinsons' && '🫁 PARKINSON\'S RISK ASSESSMENT'}
@@ -488,53 +366,25 @@ function Dashboard() {
             </p>
           </motion.div>
 
-          {/* Main grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 420px',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: '1.5rem', alignItems: 'start' }}>
 
             {/* FORM PANEL */}
-            <motion.div
-              key={`form-${activeTab}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass"
-              style={{ padding: '1.5rem' }}
-            >
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: activeTab === 'parkinsons' ? '1fr 1fr 1fr' : '1fr 1fr',
-                gap: '1.2rem',
-                marginBottom: '1.5rem',
-              }}>
+            <motion.div key={`form-${activeTab}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              className="glass" style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: activeTab === 'parkinsons' ? '1fr 1fr 1fr' : '1fr 1fr', gap: '1.2rem', marginBottom: '1.5rem' }}>
                 {activeFields.map(field => (
-                  <FormField
-                    key={field.key} field={field}
-                    value={activeState[field.key]}
-                    color={activeColor}
-                    onChange={(v) => updateField(activeSetter, field.key, v)}
-                  />
+                  <FormField key={field.key} field={field} value={activeState[field.key]}
+                    color={activeColor} onChange={(v) => updateField(activeSetter, field.key, v)} />
                 ))}
               </div>
-
-              <MagneticButton
-                onClick={handlePredict}
-                disabled={loading}
-                style={{
-                  width: '100%', padding: '1.1rem',
-                  background: loading ? 'rgba(0,255,149,0.2)' : `linear-gradient(90deg, ${activeColor}, #00b4ff)`,
-                  border: 'none', borderRadius: 12,
-                  color: '#020b18', fontSize: '1.1rem',
-                  fontWeight: 900, letterSpacing: '4px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  boxShadow: loading ? 'none' : `0 0 40px ${activeColor}40`,
-                  transition: 'all 0.3s',
-                }}
-              >
+              <MagneticButton onClick={handlePredict} disabled={loading} style={{
+                width: '100%', padding: '1.1rem',
+                background: loading ? 'rgba(0,255,149,0.2)' : `linear-gradient(90deg, ${activeColor}, #00b4ff)`,
+                border: 'none', borderRadius: 12, color: '#020b18', fontSize: '1.1rem',
+                fontWeight: 900, letterSpacing: '4px', cursor: loading ? 'not-allowed' : 'pointer',
+                fontFamily: "'Bebas Neue', sans-serif",
+                boxShadow: loading ? 'none' : `0 0 40px ${activeColor}40`, transition: 'all 0.3s',
+              }}>
                 {loading ? '⟳  RUNNING AI MODEL...' : '🔍  ANALYSE RISK'}
               </MagneticButton>
             </motion.div>
@@ -543,79 +393,39 @@ function Dashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <AnimatePresence mode="wait">
                 {!result && !loading && (
-                  <motion.div
-                    key="empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="glass"
-                    style={{ padding: '2rem', textAlign: 'center' }}
-                  >
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      style={{ fontSize: '4rem', marginBottom: '1rem' }}
-                    >
+                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="glass" style={{ padding: '2rem', textAlign: 'center' }}>
+                    <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}
+                      style={{ fontSize: '4rem', marginBottom: '1rem' }}>
                       {activeTab === 'diabetes' ? '🩸' : activeTab === 'heart' ? '🫀' : '🫁'}
                     </motion.div>
-                    <p style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.8rem' }}>
-                      Awaiting analysis input...
-                    </p>
+                    <p style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.8rem' }}>Awaiting analysis input...</p>
                   </motion.div>
                 )}
 
                 {loading && (
-                  <motion.div
-                    key="loading"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="glass"
-                    style={{ padding: '2rem', textAlign: 'center' }}
-                  >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                      style={{ fontSize: '3rem', marginBottom: '1rem', display: 'inline-block' }}
-                    >⟳</motion.div>
-                    <p style={{ color: activeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.85rem', letterSpacing: '2px' }}>
-                      RUNNING AI MODEL...
-                    </p>
+                  <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="glass" style={{ padding: '2rem', textAlign: 'center' }}>
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      style={{ fontSize: '3rem', marginBottom: '1rem', display: 'inline-block' }}>⟳</motion.div>
+                    <p style={{ color: activeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.85rem', letterSpacing: '2px' }}>RUNNING AI MODEL...</p>
                   </motion.div>
                 )}
 
                 {result && !result.error && (
-                  <motion.div
-                    key="result"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  >
+                  <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+
                     {/* Risk badge */}
                     <div className="glass" style={{
                       padding: '1.5rem',
                       border: `2px solid ${result.risk === 'HIGH' ? '#ff444460' : '#00ff9560'}`,
-                      textAlign: 'center', position: 'relative',
-                      overflow: 'hidden', marginBottom: '1rem',
+                      textAlign: 'center', position: 'relative', overflow: 'hidden', marginBottom: '1rem',
                     }}>
-                      <div style={{
-                        position: 'absolute', inset: 0,
-                        background: result.risk === 'HIGH'
-                          ? 'radial-gradient(circle at center, rgba(255,68,68,0.08), transparent)'
-                          : 'radial-gradient(circle at center, rgba(0,255,149,0.08), transparent)',
-                      }} />
-                      <motion.p
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
+                      <div style={{ position: 'absolute', inset: 0, background: result.risk === 'HIGH' ? 'radial-gradient(circle at center, rgba(255,68,68,0.08), transparent)' : 'radial-gradient(circle at center, rgba(0,255,149,0.08), transparent)' }} />
+                      <motion.p initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: 'spring', stiffness: 200 }}
-                        style={{
-                          fontFamily: "'Bebas Neue', sans-serif",
-                          fontSize: '2.5rem', letterSpacing: '4px',
-                          color: result.risk === 'HIGH' ? '#ff4444' : '#00ff95',
-                          margin: 0,
-                          textShadow: result.risk === 'HIGH' ? '0 0 30px rgba(255,68,68,0.5)' : '0 0 30px rgba(0,255,149,0.5)',
-                        }}
-                      >
+                        style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2.5rem', letterSpacing: '4px', color: result.risk === 'HIGH' ? '#ff4444' : '#00ff95', margin: 0, textShadow: result.risk === 'HIGH' ? '0 0 30px rgba(255,68,68,0.5)' : '0 0 30px rgba(0,255,149,0.5)' }}>
                         {result.risk === 'HIGH' ? '⚠ HIGH RISK' : '✅ LOW RISK'}
                       </motion.p>
                       <p style={{ color: '#8b949e', fontSize: '0.8rem', marginTop: '0.3rem' }}>
@@ -623,42 +433,68 @@ function Dashboard() {
                       </p>
                     </div>
 
-                    {/* Probability */}
+                    {/* Probability + Confidence Interval */}
                     <div className="glass" style={{ padding: '1.2rem', marginBottom: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                        <span style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.7rem', letterSpacing: '2px' }}>
-                          RISK PROBABILITY
-                        </span>
-                        <span style={{
-                          fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem',
-                          color: result.risk === 'HIGH' ? '#ff4444' : '#00ff95', letterSpacing: '2px',
-                        }}>
+                        <span style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.7rem', letterSpacing: '2px' }}>RISK PROBABILITY</span>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', color: result.risk === 'HIGH' ? '#ff4444' : '#00ff95', letterSpacing: '2px' }}>
                           <AnimatedNumber value={result.probability} suffix="%" />
                         </span>
                       </div>
-                      <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 999, height: 8, overflow: 'hidden' }}>
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${result.probability}%` }}
+                      <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 999, height: 8, overflow: 'hidden', marginBottom: '0.75rem' }}>
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${result.probability}%` }}
                           transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                          style={{
-                            height: '100%', borderRadius: 999,
-                            background: result.risk === 'HIGH'
-                              ? 'linear-gradient(90deg, #ff4444, #ff6b6b)'
-                              : 'linear-gradient(90deg, #00ff95, #00b4ff)',
-                            boxShadow: result.risk === 'HIGH' ? '0 0 10px rgba(255,68,68,0.5)' : '0 0 10px rgba(0,255,149,0.5)',
-                          }}
-                        />
+                          style={{ height: '100%', borderRadius: 999, background: result.risk === 'HIGH' ? 'linear-gradient(90deg, #ff4444, #ff6b6b)' : 'linear-gradient(90deg, #00ff95, #00b4ff)', boxShadow: result.risk === 'HIGH' ? '0 0 10px rgba(255,68,68,0.5)' : '0 0 10px rgba(0,255,149,0.5)' }} />
                       </div>
+
+                      {/* Confidence Interval */}
+                      {result.confidence_interval && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                          style={{ background: 'rgba(0,180,255,0.05)', border: '1px solid rgba(0,180,255,0.15)', borderRadius: 8, padding: '0.6rem 0.8rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                            <span style={{ color: '#00b4ff', fontFamily: "'Space Mono', monospace", fontSize: '0.65rem', letterSpacing: '2px' }}>
+                              🎯 CONFIDENCE INTERVAL
+                            </span>
+                            <span style={{ color: '#8b949e', fontFamily: "'Space Mono', monospace", fontSize: '0.65rem' }}>
+                              95% CI
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: '#00ff95', fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem' }}>
+                              {result.confidence_interval.lower}%
+                            </span>
+                            <div style={{ flex: 1, position: 'relative', height: 6, background: 'rgba(0,0,0,0.3)', borderRadius: 999 }}>
+                              <motion.div
+                                initial={{ left: '50%', right: '50%' }}
+                                animate={{
+                                  left: `${result.confidence_interval.lower}%`,
+                                  right: `${100 - result.confidence_interval.upper}%`,
+                                }}
+                                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                                style={{ position: 'absolute', top: 0, bottom: 0, background: 'linear-gradient(90deg, #00b4ff60, #00b4ff)', borderRadius: 999 }}
+                              />
+                              <motion.div
+                                initial={{ left: '50%' }}
+                                animate={{ left: `${result.probability}%` }}
+                                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                                style={{ position: 'absolute', top: '50%', transform: 'translate(-50%, -50%)', width: 10, height: 10, borderRadius: '50%', background: result.risk === 'HIGH' ? '#ff4444' : '#00ff95', boxShadow: `0 0 6px ${result.risk === 'HIGH' ? '#ff4444' : '#00ff95'}` }}
+                              />
+                            </div>
+                            <span style={{ color: '#ff6b6b', fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem' }}>
+                              {result.confidence_interval.upper}%
+                            </span>
+                          </div>
+                          <p style={{ color: '#8b949e', fontSize: '0.7rem', textAlign: 'center', marginTop: '0.4rem', fontFamily: "'Space Mono', monospace" }}>
+                            Model std deviation: ±{result.confidence_interval.std}%
+                          </p>
+                        </motion.div>
+                      )}
                     </div>
 
                     {/* Feature importance */}
                     {result.top_features && (
                       <div className="glass" style={{ padding: '1.2rem', marginBottom: '1rem' }}>
-                        <p style={{
-                          fontFamily: "'Space Mono', monospace", color: activeColor,
-                          fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem',
-                        }}>◈ TOP RISK FACTORS</p>
+                        <p style={{ fontFamily: "'Space Mono', monospace", color: activeColor, fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem' }}>◈ TOP RISK FACTORS</p>
                         {result.top_features.map((f, i) => (
                           <div key={i} style={{ marginBottom: '0.6rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
@@ -666,45 +502,25 @@ function Dashboard() {
                               <span style={{ color: activeColor, fontSize: '0.75rem', fontFamily: "'Space Mono', monospace" }}>{f.importance}%</span>
                             </div>
                             <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 999, height: 4 }}>
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${f.importance}%` }}
+                              <motion.div initial={{ width: 0 }} animate={{ width: `${f.importance}%` }}
                                 transition={{ duration: 1, delay: i * 0.1 }}
-                                style={{
-                                  height: '100%', borderRadius: 999,
-                                  background: `linear-gradient(90deg, ${activeColor}, ${activeColor}80)`,
-                                }}
-                              />
+                                style={{ height: '100%', borderRadius: 999, background: `linear-gradient(90deg, ${activeColor}, ${activeColor}80)` }} />
                             </div>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {/* What-if simulator */}
+                    {/* What-if */}
                     {whatif && (
                       <div className="glass" style={{ padding: '1.2rem', marginBottom: '1rem' }}>
-                        <p style={{
-                          fontFamily: "'Space Mono', monospace", color: '#00b4ff',
-                          fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem',
-                        }}>🔮 WHAT-IF SIMULATOR</p>
+                        <p style={{ fontFamily: "'Space Mono', monospace", color: '#00b4ff', fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem' }}>🔮 WHAT-IF SIMULATOR</p>
                         {Object.entries(whatif).map(([scenario, prob], i) => (
-                          <motion.div key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            style={{
-                              background: 'rgba(0,180,255,0.05)',
-                              border: '1px solid rgba(0,180,255,0.15)',
-                              borderRadius: 8, padding: '0.6rem 0.8rem', marginBottom: '0.5rem',
-                            }}
-                          >
+                          <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
+                            style={{ background: 'rgba(0,180,255,0.05)', border: '1px solid rgba(0,180,255,0.15)', borderRadius: 8, padding: '0.6rem 0.8rem', marginBottom: '0.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <span style={{ color: '#c9d1d9', fontSize: '0.75rem' }}>💡 {scenario}</span>
-                              <span style={{
-                                color: prob < result.probability ? '#00ff95' : '#ff6b6b',
-                                fontFamily: "'Space Mono', monospace", fontSize: '0.8rem', fontWeight: 700,
-                              }}>
+                              <span style={{ color: prob < result.probability ? '#00ff95' : '#ff6b6b', fontFamily: "'Space Mono', monospace", fontSize: '0.8rem', fontWeight: 700 }}>
                                 {prob < result.probability ? '↓' : '↑'} {prob}%
                               </span>
                             </div>
@@ -715,50 +531,33 @@ function Dashboard() {
 
                     {/* Health tips */}
                     <div className="glass" style={{ padding: '1.2rem', marginBottom: '1rem' }}>
-                      <p style={{
-                        fontFamily: "'Space Mono', monospace", color: activeColor,
-                        fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem',
-                      }}>💡 HEALTH RECOMMENDATIONS</p>
+                      <p style={{ fontFamily: "'Space Mono', monospace", color: activeColor, fontSize: '0.65rem', letterSpacing: '2px', marginBottom: '0.75rem' }}>💡 HEALTH RECOMMENDATIONS</p>
                       {getTips(activeTab, result.risk).map((tip, i) => (
-                        <motion.div key={i}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.08 }}
-                          style={{
-                            borderLeft: `3px solid ${activeColor}60`,
-                            paddingLeft: '0.75rem', marginBottom: '0.5rem',
-                            color: '#c9d1d9', fontSize: '0.82rem',
-                          }}
-                        >{tip}</motion.div>
+                        <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
+                          style={{ borderLeft: `3px solid ${activeColor}60`, paddingLeft: '0.75rem', marginBottom: '0.5rem', color: '#c9d1d9', fontSize: '0.82rem' }}>
+                          {tip}
+                        </motion.div>
                       ))}
                     </div>
 
-                    {/* PDF Download Button */}
-                    <MagneticButton
-                      onClick={handleDownloadPDF}
-                      style={{
-                        width: '100%', padding: '0.9rem',
-                        background: 'linear-gradient(90deg, #ff006e, #00b4ff)',
-                        border: 'none', borderRadius: 12,
-                        color: '#ffffff', fontSize: '0.95rem',
-                        fontWeight: 900, letterSpacing: '3px',
-                        cursor: 'pointer',
-                        fontFamily: "'Bebas Neue', sans-serif",
-                        boxShadow: '0 0 30px rgba(255,0,110,0.3)',
-                      }}
-                    >
+                    {/* PDF Download */}
+                    <MagneticButton onClick={handleDownloadPDF} style={{
+                      width: '100%', padding: '0.9rem',
+                      background: 'linear-gradient(90deg, #ff006e, #00b4ff)',
+                      border: 'none', borderRadius: 12, color: '#ffffff',
+                      fontSize: '0.95rem', fontWeight: 900, letterSpacing: '3px',
+                      cursor: 'pointer', fontFamily: "'Bebas Neue', sans-serif",
+                      boxShadow: '0 0 30px rgba(255,0,110,0.3)',
+                    }}>
                       📄 DOWNLOAD PDF REPORT
                     </MagneticButton>
-
                   </motion.div>
                 )}
 
                 {result?.error && (
-                  <motion.div key="error" className="glass" style={{
-                    padding: '1.2rem',
-                    border: '1px solid rgba(255,68,68,0.4)',
-                    color: '#ff6b6b', fontSize: '0.85rem',
-                  }}>⚠ {result.error}</motion.div>
+                  <motion.div key="error" className="glass" style={{ padding: '1.2rem', border: '1px solid rgba(255,68,68,0.4)', color: '#ff6b6b', fontSize: '0.85rem' }}>
+                    ⚠ {result.error}
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>
